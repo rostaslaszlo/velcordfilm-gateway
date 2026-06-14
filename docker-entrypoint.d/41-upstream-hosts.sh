@@ -13,5 +13,7 @@ OFFERSERVICE_HOST="${OFFERSERVICE_HOST:-offerservice}"
 
 sed -i "s/server frontend:80;/server ${FRONTEND_HOST}:80;/" /etc/nginx/nginx.conf
 sed -i "s/server offerservice:3000;/server ${OFFERSERVICE_HOST}:3000;/" /etc/nginx/nginx.conf
+sed -i "s/proxy_set_header Host frontend;/proxy_set_header Host ${FRONTEND_HOST};/g" /etc/nginx/nginx.conf
+sed -i "s/proxy_set_header Host offerservice;/proxy_set_header Host ${OFFERSERVICE_HOST};/g" /etc/nginx/nginx.conf
 
 echo "[gateway] upstream hosts: frontend=${FRONTEND_HOST} offerservice=${OFFERSERVICE_HOST}"
