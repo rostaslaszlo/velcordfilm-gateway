@@ -18,12 +18,16 @@ fi
 
 mkdir -p /var/www/certbot
 
-cp /etc/nginx/tls-available/server-extra/50-acme-challenge.conf /etc/nginx/conf.d/server-extra/
+# port80-extra: csak a plain-HTTP listenerre való dolgok (ACME challenge +
+# HTTPS redirect) - NEM a server-extra-ba mennek, mert azt a 443-as blokk is
+# includeolja (staging basic auth/noindex/bot-block), és a redirect ott
+# végtelen ciklust okozna (https -> https).
+cp /etc/nginx/tls-available/port80-extra/50-acme-challenge.conf /etc/nginx/conf.d/port80-extra/
 
 CERT_DIR="/etc/letsencrypt/live/${TLS_DOMAIN}"
 if [ -f "${CERT_DIR}/fullchain.pem" ] && [ -f "${CERT_DIR}/privkey.pem" ]; then
     echo "[gateway] TLS_DOMAIN=${TLS_DOMAIN}, certificate found -> enabling HTTPS + redirect"
-    cp /etc/nginx/tls-available/server-extra/60-tls-redirect.conf /etc/nginx/conf.d/server-extra/
+    cp /etc/nginx/tls-available/port80-extra/60-tls-redirect.conf /etc/nginx/conf.d/port80-extra/
     sed "s#__TLS_DOMAIN__#${TLS_DOMAIN}#g" /etc/nginx/tls-available/tls-server/50-https.conf.template \
         > /etc/nginx/conf.d/tls-server/50-https.conf
 

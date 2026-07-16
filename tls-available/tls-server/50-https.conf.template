@@ -17,5 +17,11 @@ server {
     proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
 
+    # Staging-only server-szintű config (basic auth, noindex, AI bot tiltás) –
+    # üres production-ben. Ugyanez a directory a plain-HTTP blokkban is
+    # includeolva van (lásd ../../nginx.conf) - enélkül a HTTP->HTTPS redirect
+    # miatt a valódi forgalom sosem futott volna át a basic auth-on.
+    include /etc/nginx/conf.d/server-extra/*.conf;
+
     include /etc/nginx/snippets/proxy-locations.conf;
 }
