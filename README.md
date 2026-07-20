@@ -4,13 +4,20 @@ Nginx reverse proxy – a stack egyetlen publikus belépési pontja.
 
 ## Routing
 
+**Ág: `feature/nextjs-ssr`** — kísérleti alternatíva a botCache mellett, Next.js
+SSR-rel szolgálja ki a publikus oldalakat SEO céllal. Az admin panel
+változatlanul a `frontend` (CRA) konténeren marad.
+
 | Útvonal | Cél |
 |---|---|
 | `/api/blog/*` | `offerservice:3000/blog/` (nginx cache) |
 | `/api/*` | `offerservice:3000` |
 | `/auth/*` | `offerservice:3000/auth/` |
 | `/health` | `offerservice:3000/health` |
-| `/*` | `frontend:80` |
+| `/_next/*` | `nextapp:3000` (Next.js saját asset-jei) |
+| `/admin/*` | `frontend:80` (változatlan CRA admin) |
+| `*.{jpg,png,css,js,...}` | `frontend:80` (CRA bundle, statikus média) |
+| `/*` (minden más — publikus oldalak, robots.txt, sitemap.xml, llms.txt) | `nextapp:3000` |
 
 ## "Staging" védelmi réteg (`ENVIRONMENT`)
 
