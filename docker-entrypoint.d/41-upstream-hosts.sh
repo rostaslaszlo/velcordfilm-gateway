@@ -19,9 +19,16 @@ if [ "$OFFERSERVICE_HOST" != "offerservice" ]; then
     OFFERSERVICE_PORT=80
 fi
 
-sed -i "s/server frontend:80;/server ${FRONTEND_HOST}:80;/" /etc/nginx/nginx.conf
-sed -i "s/server offerservice:3000;/server ${OFFERSERVICE_HOST}:${OFFERSERVICE_PORT};/" /etc/nginx/nginx.conf
+# A `resolve`-os upstream-ekhez (lásd nginx.conf) kell egy resolver: a konténer saját DNS-e,
+# docker-compose alatt 127.0.0.11, más platformon az ottani érték.
+RESOLVER=$(awk '/^nameserver/ { print $2; exit }' /etc/resolv.conf)
+if [ -n "$RESOLVER" ]; then
+    sed -i "s/resolver 127.0.0.11 /resolver ${RESOLVER} /" /etc/nginx/nginx.conf
+fi
+
+sed -i "s/server frontend:80 resolve;/server ${FRONTEND_HOST}:80 resolve;/" /etc/nginx/nginx.conf
+sed -i "s/server offerservice:3000 resolve;/server ${OFFERSERVICE_HOST}:${OFFERSERVICE_PORT} resolve;/" /etc/nginx/nginx.conf
 sed -i "s/proxy_set_header Host frontend;/proxy_set_header Host ${FRONTEND_HOST};/g" /etc/nginx/nginx.conf
 sed -i "s/proxy_set_header Host offerservice;/proxy_set_header Host ${OFFERSERVICE_HOST};/g" /etc/nginx/nginx.conf
 
-echo "[gateway] upstream hosts: frontend=${FRONTEND_HOST} offerservice=${OFFERSERVICE_HOST}:${OFFERSERVICE_PORT}"
+echo "[gateway] upstream hosts: frontend=${FRONTEND_HOST} offerservice=${OFFERSERVICE_HOST}:${OFFERSERVICE_PORT} resolver=${RESOLVER:-127.0.0.11}"
