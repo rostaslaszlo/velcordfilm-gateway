@@ -4,6 +4,9 @@
 # snippets/proxy-locations.conf instead of duplicating them.
 server {
     listen 443 ssl;
+    # HTTP/2: egy kapcsolaton párhuzamos kérések — HTTP/1.1-en a böngésző hostonként ~6 kapcsolatot
+    # nyit, és sok kép mellett (admin photobox lista) Safari a fetch-kéréseket a képek mögé sorolja
+    http2 on;
     server_name _;
     server_tokens off;
 
